@@ -56,7 +56,12 @@ function equalizer_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 
 % Update handles structure
+handles.isPlaying = 0;
+handles.player = 0;
+handles.song = 0;
+handles.Fs = 44100;
 guidata(hObject, handles);
+
 
 % UIWAIT makes equalizer wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
@@ -78,7 +83,15 @@ function BrowseButton_Callback(hObject, eventdata, handles)
 % hObject    handle to BrowseButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+[filename pathname] = uigetfile({'*.mp3'},'File Selector');
+if filename==0
+    return
+end
+handles.fullpathname = strcat(pathname, filename);
+[song, Fs] = audioread(handles.fullpathname);
+handles.Fs=Fs;
+handles.song = song;
+guidata(hObject,handles);
 
 
 function FileAddress_Callback(hObject, eventdata, handles)
@@ -108,6 +121,29 @@ function StartPauseButton_Callback(hObject, eventdata, handles)
 % hObject    handle to StartPauseButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+if (handles.player == 0)
+handles.player = audioplayer(handles.song,handles.Fs);
+handles.isPlaying = 1;
+play(handles.player)
+guidata(hObject,handles);
+return;
+end
+if (handles.isPlaying == 1)
+    pause(handles.player);
+    handles.isPlaying =0;
+    guidata(hObject,handles);
+    return;
+end
+if (handles.isPlaying == 0)
+    resume(handles.player);
+    handles.isPlaying =1;
+    guidata(hObject,handles);
+    guidata(hObject,handles);
+    return;
+end
+
+
+
 
 
 % --- Executes on button press in pushbutton3.
@@ -484,6 +520,7 @@ function s10_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+print eventdata
 
 
 % --- Executes during object creation, after setting all properties.
