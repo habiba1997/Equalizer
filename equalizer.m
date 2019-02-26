@@ -57,9 +57,13 @@ handles.output = hObject;
 
 % Update handles structure
 handles.isPlaying = 0;
-handles.player = 0;
 handles.song = 0;
 handles.Fs = 44100;
+handles.currentPosition = 0;
+handles.originalFourier = 0;
+handles.newFourier = 0;
+handles.newSong =0;
+handles.player = 0;
 guidata(hObject, handles);
 
 
@@ -87,10 +91,17 @@ function BrowseButton_Callback(hObject, eventdata, handles)
 if filename==0
     return
 end
+if handles.isPlaying
+    pause(handles.player)
+end
 handles.fullpathname = strcat(pathname, filename);
 [song, Fs] = audioread(handles.fullpathname);
 handles.Fs=Fs;
 handles.song = song;
+handles.originalFourier = fftshift(fft(handles.song));
+handles.newFourier = handles.originalFourier;
+handles.newSong = song;
+handles.player = 0;
 guidata(hObject,handles);
 
 
@@ -129,13 +140,14 @@ guidata(hObject,handles);
 return;
 end
 if (handles.isPlaying == 1)
+    handles.currentPosition = get(handles.player,'CurrentSample');
     pause(handles.player);
     handles.isPlaying =0;
     guidata(hObject,handles);
     return;
 end
 if (handles.isPlaying == 0)
-    resume(handles.player);
+    play(handles.player, handles.currentPosition);
     handles.isPlaying =1;
     guidata(hObject,handles);
     guidata(hObject,handles);
@@ -168,6 +180,12 @@ function S9_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+dbGain = get(handles.S9,'value');
+handles= editFrequency(handles,dbGain,8000,10000);
+guidata(hObject,handles);
+    
+
+
 
 
 % --- Executes during object creation, after setting all properties.
@@ -190,7 +208,9 @@ function S8_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-
+dbGain = get(handles.S8,'value');
+handles= editFrequency(handles,dbGain,4000,8000);
+guidata(hObject,handles);
 
 % --- Executes during object creation, after setting all properties.
 function S8_CreateFcn(hObject, eventdata, handles)
@@ -212,7 +232,9 @@ function S7_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-
+dbGain = get(handles.S7,'value');
+handles= editFrequency(handles,dbGain,2000,4000);
+guidata(hObject,handles);
 
 % --- Executes during object creation, after setting all properties.
 function S7_CreateFcn(hObject, eventdata, handles)
@@ -234,7 +256,9 @@ function S6_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-
+dbGain = get(handles.S6,'value');
+handles= editFrequency(handles,dbGain,1000,2000);
+guidata(hObject,handles);
 
 % --- Executes during object creation, after setting all properties.
 function S6_CreateFcn(hObject, eventdata, handles)
@@ -256,7 +280,9 @@ function S5_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-
+dbGain = get(handles.S5,'value');
+handles= editFrequency(handles,dbGain,500,1000);
+guidata(hObject,handles);
 
 % --- Executes during object creation, after setting all properties.
 function S5_CreateFcn(hObject, eventdata, handles)
@@ -278,7 +304,9 @@ function S4_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-
+dbGain = get(handles.S4,'value');
+handles= editFrequency(handles,dbGain,250,500);
+guidata(hObject,handles);
 
 % --- Executes during object creation, after setting all properties.
 function S4_CreateFcn(hObject, eventdata, handles)
@@ -300,7 +328,9 @@ function S3_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-
+dbGain = get(handles.S3,'value');
+handles= editFrequency(handles,dbGain,125,250);
+guidata(hObject,handles);
 
 % --- Executes during object creation, after setting all properties.
 function S3_CreateFcn(hObject, eventdata, handles)
@@ -322,7 +352,9 @@ function S2_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-
+dbGain = get(handles.S2,'value');
+handles= editFrequency(handles,dbGain,62,125);
+guidata(hObject,handles);
 
 % --- Executes during object creation, after setting all properties.
 function S2_CreateFcn(hObject, eventdata, handles)
@@ -344,7 +376,9 @@ function S1_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-
+dbGain = get(handles.S1,'value');
+handles= editFrequency(handles,dbGain,31,62);
+guidata(hObject,handles);
 
 % --- Executes during object creation, after setting all properties.
 function S1_CreateFcn(hObject, eventdata, handles)
@@ -356,96 +390,6 @@ function S1_CreateFcn(hObject, eventdata, handles)
 if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
-
-
-% --- Executes on button press in checkbox7.
-function checkbox7_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox7 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox7
-
-
-% --- Executes on button press in checkbox8.
-function checkbox8_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox8 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox8
-
-
-% --- Executes on button press in checkbox9.
-function checkbox9_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox9 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox9
-
-
-% --- Executes on button press in checkbox10.
-function checkbox10_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox10 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox10
-
-
-% --- Executes on button press in checkbox1.
-function checkbox1_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox1
-
-
-% --- Executes on button press in checkbox2.
-function checkbox2_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox2
-
-
-% --- Executes on button press in checkbox3.
-function checkbox3_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox3
-
-
-% --- Executes on button press in checkbox4.
-function checkbox4_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox4
-
-
-% --- Executes on button press in checkbox5.
-function checkbox5_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox5
-
-
-% --- Executes on button press in checkbox6.
-function checkbox6_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox6 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox6
 
 
 % --- Executes on slider movement.
@@ -520,7 +464,9 @@ function s10_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-print eventdata
+dbGain = get(handles.s10,'value');
+handles= editFrequency(handles,dbGain,10000,20000);
+guidata(hObject,handles);
 
 
 % --- Executes during object creation, after setting all properties.
