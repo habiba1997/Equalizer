@@ -14,6 +14,7 @@ plot(x,abs(handles.newFourier));
 handles.player = audioplayer(handles.newSong,handles.Fs);
 axes(handles.axes5);
 plot(handles.time,handles.newSong);
+axis([handles.time(1) handles.time(length(handles.time)) -1 1 ]);
     %set(handles.player,'CurrentSample',currentPosition);
 if handles.isPlaying
     play(handles.player,currentPosition);
