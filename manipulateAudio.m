@@ -1,4 +1,4 @@
-function [ newSongMatrix, fourierAudio ] = manipulateAudio( fourierAudio, originalFourier, samplingFrequency, gain, f1, f2 )
+function [ fourierAudio ] = manipulateAudio( fourierAudio, originalFourier, samplingFrequency, gain, f1, f2 )
 %MANIPULATEAUDIO Summary of this function goes here
 %   Detailed explanation goes here
 vectorLength = length(fourierAudio);
@@ -13,11 +13,6 @@ endIndex = round(endIndex);
 
 fourierAudio(vectorCentre+beginIndex+1:vectorCentre+endIndex,:) =originalFourier(vectorCentre+beginIndex+1:vectorCentre+endIndex,:)*gain;
 fourierAudio(vectorCentre-endIndex+1:vectorCentre-beginIndex,:) =originalFourier(vectorCentre-endIndex+1:vectorCentre-beginIndex,:)*gain;
-
-newSongMatrix = fftshift(fourierAudio);
-newSongMatrix = ifft(newSongMatrix);
-newSongMatrix = real(newSongMatrix);
-
 
 end
 

@@ -22,7 +22,7 @@ function varargout = equalizer(varargin)
 
 % Edit the above text to modify the response to help equalizer
 
-% Last Modified by GUIDE v2.5 24-Feb-2019 16:10:57
+% Last Modified by GUIDE v2.5 26-Feb-2019 15:11:51
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -94,15 +94,42 @@ end
 if handles.isPlaying
     pause(handles.player)
 end
+
 handles.fullpathname = strcat(pathname, filename);
 [song, Fs] = audioread(handles.fullpathname);
+set(handles.StartPauseButton,'String','Start');
+
+set(handles.FileAddress, 'String' , handles.fullpathname);
 handles.Fs=Fs;
 handles.song = song;
 handles.originalFourier = fftshift(fft(handles.song));
 handles.newFourier = handles.originalFourier;
 handles.newSong = song;
 handles.player = 0;
+handles.isPlaying = 0;
+handles.time=0:(1/Fs):(length(song)/Fs);
+handles.time = handles.time(1:end-1);
+axes(handles.axes4);
+plot(handles.time,song);
+x = linspace(-0.5,0.5, length(handles.newFourier))*handles.Fs;
+axes(handles.axes1);
+plot(x,abs(handles.originalFourier));
+g1 = get(handles.S1,'value');
+g2 = get(handles.S2,'value');
+g3 = get(handles.S3,'value');
+g4 = get(handles.S4,'value');
+g5 = get(handles.S5,'value');
+g6 = get(handles.S6,'value');
+g7 = get(handles.S7,'value');
+g8 = get(handles.S8,'value');
+g9 = get(handles.S9,'value');
+g10 = get(handles.s10,'value');
+
+handles = presetAudio(handles, [g1 g2 g3 g4 g5 g6 g7 g8 g9 g10]);
+
+
 guidata(hObject,handles);
+
 
 
 function FileAddress_Callback(hObject, eventdata, handles)
@@ -140,6 +167,7 @@ guidata(hObject,handles);
 return;
 end
 if (handles.isPlaying == 1)
+    set(handles.StartPauseButton,'String','Resume');
     handles.currentPosition = get(handles.player,'CurrentSample');
     pause(handles.player);
     handles.isPlaying =0;
@@ -147,29 +175,13 @@ if (handles.isPlaying == 1)
     return;
 end
 if (handles.isPlaying == 0)
+    set(handles.StartPauseButton,'String','Pause');
     play(handles.player, handles.currentPosition);
     handles.isPlaying =1;
     guidata(hObject,handles);
     guidata(hObject,handles);
     return;
 end
-
-
-
-
-
-% --- Executes on button press in pushbutton3.
-function pushbutton3_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in pushbutton4.
-function pushbutton4_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 
 % --- Executes on slider movement.
@@ -392,27 +404,6 @@ if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColo
 end
 
 
-% --- Executes on slider movement.
-function VolSlider_Callback(hObject, eventdata, handles)
-% hObject    handle to VolSlider (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'Value') returns position of slider
-%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-
-
-% --- Executes during object creation, after setting all properties.
-function VolSlider_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to VolSlider (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: slider controls usually have a light gray background.
-if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor',[.9 .9 .9]);
-end
-
 
 % --- Executes on button press in BassButton.
 function BassButton_Callback(hObject, eventdata, handles)
@@ -420,12 +411,19 @@ function BassButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+g = [ 0 0 -0.3 -2.7 0 2.1 4.5 3 0.6 0 ]
+handles = presetAudio(handles,g);
+guidata(hObject,handles);
 
 % --- Executes on button press in ClassicalButton.
 function ClassicalButton_Callback(hObject, eventdata, handles)
 % hObject    handle to ClassicalButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+ 
+g = [0 0 0 0 0 0 -0.3 -5.7 -6 -8.1 ]
+handles = presetAudio(handles,g);
+guidata(hObject,handles);
 
 
 % --- Executes on button press in DanceButton.
@@ -434,12 +432,21 @@ function DanceButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+g = [5.4 0 0 0 0 0 0 0 0 5.4 ]
+handles = presetAudio(handles,g);
+guidata(hObject,handles);
+
 
 % --- Executes on button press in RockButton.
 function RockButton_Callback(hObject, eventdata, handles)
 % hObject    handle to RockButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+g=[4.5 -3.6 -6.6 -2.7 2.1 6 7.5 7.8 7.8 8.1];
+handles = presetAudio(handles,g);
+guidata(hObject,handles);
+
 
 
 % --- Executes on button press in TechnoButton.
@@ -448,12 +455,23 @@ function TechnoButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+g=[4.8 4.2 1.5 -2.4 -3.3 -1.5 1.5 5.1 5.7 5.4 ];
+handles = presetAudio(handles,g);
+guidata(hObject,handles);
+
+
+
 
 % --- Executes on button press in TrebleButton.
 function TrebleButton_Callback(hObject, eventdata, handles)
 % hObject    handle to TrebleButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+g = [ -1.5 3.9 5.4 4.5 0.9 -1.5 -1.8 -2.1 -2.1 -0.3 ]
+handles = presetAudio(handles,g);
+guidata(hObject,handles);
 
 
 % --- Executes on slider movement.
@@ -479,3 +497,14 @@ function s10_CreateFcn(hObject, eventdata, handles)
 if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
+
+
+% --- Executes on button press in ResetButton.
+function ResetButton_Callback(hObject, eventdata, handles)
+% hObject    handle to ResetButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+g = zeros(1,10);
+handles = presetAudio(handles,g);
+guidata(hObject,handles);
+
