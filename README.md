@@ -1,1 +1,1 @@
-# EqualizerPlebs
+# Equalizer using Matlab
